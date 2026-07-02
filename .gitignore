@@ -1,0 +1,15 @@
+# Python sanal ortamı
+venv/
+
+# Python önbellek dosyaları
+__pycache__/
+*.pyc
+
+# Foundry Local / model verileri
+foundry_local_data/
+
+# İşletim sistemi dosyaları
+.DS_Store
+
+# Ortam değişkenleri (ilerde gizli anahtarlar için)
+.env
