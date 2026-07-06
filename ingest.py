@@ -49,9 +49,18 @@ def build_chunks(data_dir):
 
 # Bu dosya doğrudan çalıştırıldığında test amaçlı çıktı ver
 if __name__ == "__main__":
+    from embeddings import embed_texts
+
     chunks = build_chunks(DATA_DIR)
     print(f"Toplam {len(chunks)} parça oluşturuldu.\n")
-    # İlk 3 parçayı örnek olarak göster
-    for i, chunk in enumerate(chunks[:3]):
-        print(f"--- Parça {i+1} | Kaynak: {chunk['source']} ---")
-        print(chunk["text"][:200], "...\n")
+
+    # Tüm parçaların metinlerini bir listeye al
+    texts = [chunk["text"] for chunk in chunks]
+
+    # Hepsini vektöre çevir
+    vectors = embed_texts(texts)
+
+    print(f"{len(vectors)} adet embedding üretildi.")
+    print(f"Her vektörün boyutu: {len(vectors[0])} sayı.")
+    print(f"\nİlk parçanın ilk 5 sayısı örnek olarak:")
+    print(vectors[0][:5])
