@@ -13,3 +13,6 @@ foundry_local_data/
 
 # Ortam değişkenleri (ilerde gizli anahtarlar için)
 .env
+
+# Veritabanı (ingest.py ile yeniden üretilebilir)
+*.db

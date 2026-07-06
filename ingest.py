@@ -50,17 +50,29 @@ def build_chunks(data_dir):
 # Bu dosya doğrudan çalıştırıldığında test amaçlı çıktı ver
 if __name__ == "__main__":
     from embeddings import embed_texts
+    from database import init_db, clear_chunks, insert_chunk, get_all_chunks
 
+    # 1) Veritabanını hazırla ve eski kayıtları temizle
+    init_db()
+    clear_chunks()
+    print("Eski kayıtlar temizlendi.")
+
+    # 2) Parçaları oluştur
     chunks = build_chunks(DATA_DIR)
-    print(f"Toplam {len(chunks)} parça oluşturuldu.\n")
+    print(f"{len(chunks)} parça oluşturuldu.")
 
-    # Tüm parçaların metinlerini bir listeye al
+    # 3) Tüm parçaların embedding'lerini üret
     texts = [chunk["text"] for chunk in chunks]
-
-    # Hepsini vektöre çevir
     vectors = embed_texts(texts)
+    print(f"{len(vectors)} embedding üretildi.")
 
-    print(f"{len(vectors)} adet embedding üretildi.")
-    print(f"Her vektörün boyutu: {len(vectors[0])} sayı.")
-    print(f"\nİlk parçanın ilk 5 sayısı örnek olarak:")
-    print(vectors[0][:5])
+    # 4) Her parçayı veritabanına kaydet
+    for chunk, vector in zip(chunks, vectors):
+        insert_chunk(chunk["source"], chunk["text"], vector)
+    print("Tüm parçalar veritabanına kaydedildi.")
+
+    # 5) Kontrol: kaç kayıt var, örnek göster
+    saved = get_all_chunks()
+    print(f"\nVeritabanında {len(saved)} kayıt var.")
+    print(f"Örnek kayıt -> Kaynak: {saved[0]['source']}, "
+          f"Vektör boyutu: {len(saved[0]['embedding'])}")
