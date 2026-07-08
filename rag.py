@@ -35,7 +35,7 @@ def build_context(results):
     return "\n\n".join(blocks)
 
 
-def answer_query(question, top_k=3):
+def answer_query(question, top_k=5):
     results = get_top_chunks(question, top_k=top_k)
     context = build_context(results)
 
@@ -57,10 +57,22 @@ def answer_query(question, top_k=3):
 
     return answer, sources
 
+def answer_without_rag(question):
+    model = get_chat_model()
+    client = model.get_chat_client()
+    response = client.complete_chat([
+        {"role": "system", "content": "You are an assistant answering questions about Elden Ring lore."},
+        {"role": "user", "content": question}
+    ])
+    return response.choices[0].message.content
+
 if __name__ == "__main__":
-    question = "What is the capital of France?"
-    print(f"Question: {question}\n")
+    question = "Who developed Elden Ring and what is Radagon's secret?"
+
+    print("=== RAG KAPALI (model kendi bilgisiyle) ===")
+    print(answer_without_rag(question))
+
+    print("\n=== RAG AÇIK (bağlamla) ===")
     answer, sources = answer_query(question)
-    print("Answer:")
     print(answer)
-    print(f"\nSources: {', '.join(sources)}")
+    print(f"Sources: {', '.join(sources)}")

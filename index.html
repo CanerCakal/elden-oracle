@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elden Oracle</title>
+<style>
+  :root {
+    --bg: #0e0b06;
+    --bg-raised: #17110a;
+    --ink: #e8dcc0;
+    --ink-dim: #a1906b;
+    --gold: #c9a227;
+    --gold-bright: #efc75e;
+    --ember: #b5651d;
+    --line: #2a2013;
+    --grace: #f0d98c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(201,162,39,0.14), transparent 60%),
+      radial-gradient(ellipse at 50% 120%, rgba(181,101,29,0.10), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    min-height: 100vh;
+    line-height: 1.65;
+  }
+
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 5rem;
+  }
+
+  header { text-align: center; margin-bottom: 3rem; }
+
+  .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 1.1rem;
+    padding-left: 0.42em;
+  }
+
+  h1 {
+    font-size: clamp(2.6rem, 8vw, 4.4rem);
+    font-weight: normal;
+    letter-spacing: 0.02em;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold) 55%, var(--ember));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.05;
+  }
+
+  .tagline {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-style: italic;
+    font-size: 1.02rem;
+  }
+
+  .rule {
+    width: 60%;
+    max-width: 340px;
+    height: 1px;
+    margin: 1.8rem auto 0;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+  }
+
+  .console {
+    background: linear-gradient(180deg, var(--bg-raised), rgba(23,17,10,0.6));
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1.8rem;
+    box-shadow: 0 30px 80px -40px rgba(0,0,0,0.9), inset 0 1px 0 rgba(239,199,94,0.06);
+  }
+
+  .field { position: relative; }
+
+  textarea {
+    width: 100%;
+    background: rgba(8,6,3,0.6);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 1.05rem;
+    padding: 1rem 1.1rem;
+    resize: vertical;
+    min-height: 92px;
+    transition: border-color 0.25s;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px rgba(201,162,39,0.3);
+  }
+  textarea::placeholder { color: #6a5c3f; font-style: italic; }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle input { display: none; }
+  .track {
+    width: 46px; height: 24px;
+    background: #241a0f;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    position: relative;
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .thumb {
+    position: absolute; top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    background: var(--ink-dim);
+    border-radius: 50%;
+    transition: transform 0.25s, background 0.25s;
+  }
+  .toggle input:checked + .track {
+    background: rgba(201,162,39,0.25);
+    border-color: var(--gold);
+  }
+  .toggle input:checked + .track .thumb {
+    transform: translateX(22px);
+    background: var(--grace);
+    box-shadow: 0 0 10px rgba(240,217,140,0.7);
+  }
+  .toggle-label { font-size: 0.9rem; color: var(--ink-dim); }
+  .toggle-label b { color: var(--ink); font-weight: normal; }
+
+  button.ask {
+    background: linear-gradient(180deg, var(--gold), var(--ember));
+    color: #1a1206;
+    border: none;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.8rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.25s, opacity 0.2s;
+    box-shadow: 0 6px 20px -8px rgba(201,162,39,0.6);
+  }
+  button.ask:hover { transform: translateY(-1px); box-shadow: 0 10px 26px -8px rgba(201,162,39,0.75); }
+  button.ask:active { transform: translateY(0); }
+  button.ask:disabled { opacity: 0.5; cursor: wait; }
+
+  .answer-area { margin-top: 2.2rem; }
+
+  .answer-card {
+    background: rgba(8,6,3,0.4);
+    border-left: 2px solid var(--gold);
+    border-radius: 2px;
+    padding: 1.4rem 1.5rem;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .answer-card.show { opacity: 1; transform: translateY(0); }
+
+  .answer-mode {
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+    color: var(--ink-dim);
+  }
+  .answer-mode.rag-on { color: var(--grace); }
+  .answer-mode.rag-off { color: var(--ember); }
+
+  .answer-text { font-size: 1.06rem; white-space: pre-wrap; }
+
+  .sources {
+    margin-top: 1.3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+    color: var(--ink-dim);
+  }
+  .sources span {
+    color: var(--gold-bright);
+    font-style: italic;
+  }
+
+  .status {
+    text-align: center;
+    color: var(--ink-dim);
+    font-style: italic;
+    margin-top: 2rem;
+    min-height: 1.5rem;
+  }
+  .dots::after {
+    content: '';
+    animation: dots 1.4s steps(4, end) infinite;
+  }
+  @keyframes dots {
+    0% { content: ''; } 25% { content: '.'; }
+    50% { content: '..'; } 75% { content: '...'; }
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 4rem;
+    color: #5a4d33;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Lands Between &middot; Lore Archive</div>
+      <h1>Elden Oracle</h1>
+      <p class="tagline">Ask, and the records shall answer &mdash; grounded, never guessed.</p>
+      <div class="rule"></div>
+    </header>
+
+    <section class="console">
+      <div class="field">
+        <textarea id="question" placeholder="Who is Radagon, truly? What became of Ranni?"></textarea>
+      </div>
+      <div class="controls">
+        <label class="toggle">
+          <input type="checkbox" id="ragToggle" checked>
+          <span class="track"><span class="thumb"></span></span>
+          <span class="toggle-label">Retrieval <b id="ragState">on</b></span>
+        </label>
+        <button class="ask" id="askBtn">Consult</button>
+      </div>
+    </section>
+
+    <div class="answer-area" id="answerArea"></div>
+    <div class="status" id="status"></div>
+
+    <footer>Powered locally &middot; Foundry Local &middot; No connection to the outer world</footer>
+  </div>
+
+<script>
+  const askBtn = document.getElementById('askBtn');
+  const questionEl = document.getElementById('question');
+  const ragToggle = document.getElementById('ragToggle');
+  const ragState = document.getElementById('ragState');
+  const answerArea = document.getElementById('answerArea');
+  const statusEl = document.getElementById('status');
+
+  ragToggle.addEventListener('change', () => {
+    ragState.textContent = ragToggle.checked ? 'on' : 'off';
+  });
+
+  async function ask() {
+    const question = questionEl.value.trim();
+    if (!question) {
+      statusEl.textContent = 'The archive awaits a question.';
+      return;
+    }
+
+    const useRag = ragToggle.checked;
+    askBtn.disabled = true;
+    answerArea.innerHTML = '';
+    statusEl.innerHTML = '<span class="dots">Consulting the records</span>';
+
+    try {
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, use_rag: useRag })
+      });
+      const data = await res.json();
+      statusEl.textContent = '';
+
+      if (data.error) {
+        statusEl.textContent = data.error;
+        return;
+      }
+      renderAnswer(data.answer, data.sources, useRag);
+    } catch (err) {
+      statusEl.textContent = 'The connection to the local archive failed. Is the server running?';
+    } finally {
+      askBtn.disabled = false;
+    }
+  }
+
+  function renderAnswer(answer, sources, useRag) {
+    const card = document.createElement('div');
+    card.className = 'answer-card';
+
+    const mode = document.createElement('div');
+    mode.className = 'answer-mode ' + (useRag ? 'rag-on' : 'rag-off');
+    mode.textContent = useRag ? 'Retrieval-grounded answer' : 'Unaided model — no retrieval';
+    card.appendChild(mode);
+
+    const text = document.createElement('div');
+    text.className = 'answer-text';
+    text.textContent = answer;
+    card.appendChild(text);
+
+    if (sources && sources.length > 0) {
+      const src = document.createElement('div');
+      src.className = 'sources';
+      src.innerHTML = 'Drawn from: <span>' + sources.join('</span>, <span>') + '</span>';
+      card.appendChild(src);
+    }
+
+    answerArea.appendChild(card);
+    requestAnimationFrame(() => card.classList.add('show'));
+  }
+
+  askBtn.addEventListener('click', ask);
+  questionEl.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') ask();
+  });
+</script>
+</body>
+</html>
