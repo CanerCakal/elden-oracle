@@ -55,7 +55,15 @@ def answer_query(question, top_k=5):
         if chunk["source"] not in sources:
             sources.append(chunk["source"])
 
-    return answer, sources
+    retrieved = []
+    for score, chunk in results:
+        retrieved.append({
+            "source": chunk["source"],
+            "score": round(float(score), 3),
+            "text": chunk["text"]
+        })
+
+    return answer, sources, retrieved
 
 def answer_without_rag(question):
     model = get_chat_model()
@@ -67,12 +75,12 @@ def answer_without_rag(question):
     return response.choices[0].message.content
 
 if __name__ == "__main__":
-    question = "Who developed Elden Ring and what is Radagon's secret?"
-
-    print("=== RAG KAPALI (model kendi bilgisiyle) ===")
-    print(answer_without_rag(question))
-
-    print("\n=== RAG AÇIK (bağlamla) ===")
-    answer, sources = answer_query(question)
+    question = "What is Radagon's secret?"
+    print(f"Question: {question}\n")
+    answer, sources, retrieved = answer_query(question)
+    print("Answer:")
     print(answer)
-    print(f"Sources: {', '.join(sources)}")
+    print(f"\nSources: {', '.join(sources)}")
+    print(f"\nRetrieved {len(retrieved)} chunks:")
+    for r in retrieved:
+        print(f"  [{r['score']}] {r['source']}")

@@ -19,8 +19,12 @@ def ask():
         return jsonify({"error": "Question is empty."}), 400
 
     if use_rag:
-        answer, sources = answer_query(question)
-        return jsonify({"answer": answer, "sources": sources})
+        answer, sources, retrieved = answer_query(question)
+        return jsonify({
+            "answer": answer,
+            "sources": sources,
+            "retrieved": retrieved
+        })
     else:
         answer = answer_without_rag(question)
         return jsonify({"answer": answer, "sources": []})

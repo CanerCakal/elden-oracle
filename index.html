@@ -198,6 +198,80 @@
     font-size: 0.85rem;
     color: var(--ink-dim);
   }
+
+  .retrieval-panel {
+    margin-top: 1.2rem;
+    border-top: 1px solid var(--line);
+    padding-top: 1rem;
+  }
+
+  .retrieval-toggle {
+    background: none;
+    border: none;
+    color: var(--ink-dim);
+    font-family: inherit;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+  }
+  .retrieval-toggle:hover { color: var(--gold-bright); }
+
+  .retrieval-list {
+    display: none;
+    margin-top: 1rem;
+  }
+  .retrieval-list.open { display: block; }
+
+  .retrieval-item {
+    background: rgba(8,6,3,0.5);
+    border-left: 2px solid var(--line);
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.7rem;
+    border-radius: 2px;
+    transition: border-color 0.2s;
+  }
+  .retrieval-item:hover { border-left-color: var(--gold); }
+
+  .retrieval-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.78rem;
+  }
+  .retrieval-source {
+    color: var(--gold-bright);
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+  .retrieval-score {
+    color: var(--ink-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .score-bar {
+    display: inline-block;
+    width: 60px;
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+    margin-left: 0.6rem;
+    vertical-align: middle;
+    overflow: hidden;
+  }
+  .score-fill {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--ember), var(--gold-bright));
+  }
+
+  .retrieval-text {
+    font-size: 0.88rem;
+    color: var(--ink-dim);
+    line-height: 1.55;
+  }
+
   .sources span {
     color: var(--gold-bright);
     font-style: italic;
@@ -298,7 +372,7 @@
         statusEl.textContent = data.error;
         return;
       }
-      renderAnswer(data.answer, data.sources, useRag);
+      renderAnswer(data.answer, data.sources, data.retrieved, useRag);
     } catch (err) {
       statusEl.textContent = 'The connection to the local archive failed. Is the server running?';
     } finally {
@@ -306,7 +380,7 @@
     }
   }
 
-  function renderAnswer(answer, sources, useRag) {
+  function renderAnswer(answer, sources, retrieved, useRag) {
     const card = document.createElement('div');
     card.className = 'answer-card';
 
@@ -325,6 +399,57 @@
       src.className = 'sources';
       src.innerHTML = 'Drawn from: <span>' + sources.join('</span>, <span>') + '</span>';
       card.appendChild(src);
+    }
+
+    if (retrieved && retrieved.length > 0) {
+      const panel = document.createElement('div');
+      panel.className = 'retrieval-panel';
+
+      const btn = document.createElement('button');
+      btn.className = 'retrieval-toggle';
+      btn.textContent = '▸ Show the ' + retrieved.length + ' passages consulted';
+
+      const list = document.createElement('div');
+      list.className = 'retrieval-list';
+
+      retrieved.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'retrieval-item';
+
+        const meta = document.createElement('div');
+        meta.className = 'retrieval-meta';
+
+        const srcSpan = document.createElement('span');
+        srcSpan.className = 'retrieval-source';
+        srcSpan.textContent = item.source;
+
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'retrieval-score';
+        const pct = Math.max(0, Math.min(100, item.score * 100));
+        scoreSpan.innerHTML = item.score.toFixed(3) +
+          '<span class="score-bar"><span class="score-fill" style="width:' + pct + '%"></span></span>';
+
+        meta.appendChild(srcSpan);
+        meta.appendChild(scoreSpan);
+        row.appendChild(meta);
+
+        const body = document.createElement('div');
+        body.className = 'retrieval-text';
+        body.textContent = item.text;
+        row.appendChild(body);
+
+        list.appendChild(row);
+      });
+
+      btn.addEventListener('click', () => {
+        const open = list.classList.toggle('open');
+        btn.textContent = (open ? '▾ Hide' : '▸ Show') +
+          ' the ' + retrieved.length + ' passages consulted';
+      });
+
+      panel.appendChild(btn);
+      panel.appendChild(list);
+      card.appendChild(panel);
     }
 
     answerArea.appendChild(card);
