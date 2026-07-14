@@ -272,6 +272,45 @@
     line-height: 1.55;
   }
 
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+  }
+  @media (max-width: 720px) {
+    .compare-grid { grid-template-columns: 1fr; }
+  }
+
+  .compare-grid .answer-card { margin: 0; }
+  .compare-grid .answer-card.grounded { border-left-color: var(--gold); }
+  .compare-grid .answer-card.unaided { border-left-color: var(--ember); }
+
+  .mode-select {
+    display: flex;
+    gap: 0.4rem;
+    background: rgba(8,6,3,0.6);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0.25rem;
+  }
+  .mode-select button {
+    background: none;
+    border: none;
+    color: var(--ink-dim);
+    font-family: inherit;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .mode-select button:hover { color: var(--ink); }
+  .mode-select button.active {
+    background: rgba(201,162,39,0.18);
+    color: var(--grace);
+  }
+
   .sources span {
     color: var(--gold-bright);
     font-style: italic;
@@ -320,11 +359,11 @@
         <textarea id="question" placeholder="Who is Radagon, truly? What became of Ranni?"></textarea>
       </div>
       <div class="controls">
-        <label class="toggle">
-          <input type="checkbox" id="ragToggle" checked>
-          <span class="track"><span class="thumb"></span></span>
-          <span class="toggle-label">Retrieval <b id="ragState">on</b></span>
-        </label>
+        <div class="mode-select">
+          <button data-mode="rag" class="active">Retrieval on</button>
+          <button data-mode="plain">Retrieval off</button>
+          <button data-mode="compare">Compare</button>
+        </div>
         <button class="ask" id="askBtn">Consult</button>
       </div>
     </section>
@@ -336,15 +375,20 @@
   </div>
 
 <script>
-  const askBtn = document.getElementById('askBtn');
+const askBtn = document.getElementById('askBtn');
   const questionEl = document.getElementById('question');
-  const ragToggle = document.getElementById('ragToggle');
-  const ragState = document.getElementById('ragState');
   const answerArea = document.getElementById('answerArea');
   const statusEl = document.getElementById('status');
+  const modeButtons = document.querySelectorAll('.mode-select button');
 
-  ragToggle.addEventListener('change', () => {
-    ragState.textContent = ragToggle.checked ? 'on' : 'off';
+  let mode = 'rag';
+
+  modeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      modeButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      mode = btn.dataset.mode;
+    });
   });
 
   async function ask() {
@@ -354,16 +398,20 @@
       return;
     }
 
-    const useRag = ragToggle.checked;
     askBtn.disabled = true;
     answerArea.innerHTML = '';
     statusEl.innerHTML = '<span class="dots">Consulting the records</span>';
 
+    const endpoint = mode === 'compare' ? '/compare' : '/ask';
+    const payload = mode === 'compare'
+      ? { question }
+      : { question, use_rag: mode === 'rag' };
+
     try {
-      const res = await fetch('/ask', {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, use_rag: useRag })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       statusEl.textContent = '';
@@ -372,7 +420,14 @@
         statusEl.textContent = data.error;
         return;
       }
-      renderAnswer(data.answer, data.sources, data.retrieved, useRag);
+
+      if (mode === 'compare') {
+        renderComparison(data);
+      } else {
+        const card = buildCard(data.answer, data.sources, data.retrieved, mode === 'rag');
+        answerArea.appendChild(card);
+        requestAnimationFrame(() => card.classList.add('show'));
+      }
     } catch (err) {
       statusEl.textContent = 'The connection to the local archive failed. Is the server running?';
     } finally {
@@ -380,13 +435,37 @@
     }
   }
 
-  function renderAnswer(answer, sources, retrieved, useRag) {
+  function renderComparison(data) {
+    const grid = document.createElement('div');
+    grid.className = 'compare-grid';
+
+    const groundedCard = buildCard(
+      data.rag.answer, data.rag.sources, data.rag.retrieved, true
+    );
+    groundedCard.classList.add('grounded');
+
+    const unaidedCard = buildCard(
+      data.plain.answer, [], null, false
+    );
+    unaidedCard.classList.add('unaided');
+
+    grid.appendChild(groundedCard);
+    grid.appendChild(unaidedCard);
+    answerArea.appendChild(grid);
+
+    requestAnimationFrame(() => {
+      groundedCard.classList.add('show');
+      unaidedCard.classList.add('show');
+    });
+  }
+
+  function buildCard(answer, sources, retrieved, useRag) {
     const card = document.createElement('div');
     card.className = 'answer-card';
 
     const mode = document.createElement('div');
     mode.className = 'answer-mode ' + (useRag ? 'rag-on' : 'rag-off');
-    mode.textContent = useRag ? 'Retrieval-grounded answer' : 'Unaided model — no retrieval';
+    mode.textContent = useRag ? 'Retrieval-grounded' : 'Unaided model';
     card.appendChild(mode);
 
     const text = document.createElement('div');
@@ -402,58 +481,61 @@
     }
 
     if (retrieved && retrieved.length > 0) {
-      const panel = document.createElement('div');
-      panel.className = 'retrieval-panel';
-
-      const btn = document.createElement('button');
-      btn.className = 'retrieval-toggle';
-      btn.textContent = '▸ Show the ' + retrieved.length + ' passages consulted';
-
-      const list = document.createElement('div');
-      list.className = 'retrieval-list';
-
-      retrieved.forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'retrieval-item';
-
-        const meta = document.createElement('div');
-        meta.className = 'retrieval-meta';
-
-        const srcSpan = document.createElement('span');
-        srcSpan.className = 'retrieval-source';
-        srcSpan.textContent = item.source;
-
-        const scoreSpan = document.createElement('span');
-        scoreSpan.className = 'retrieval-score';
-        const pct = Math.max(0, Math.min(100, item.score * 100));
-        scoreSpan.innerHTML = item.score.toFixed(3) +
-          '<span class="score-bar"><span class="score-fill" style="width:' + pct + '%"></span></span>';
-
-        meta.appendChild(srcSpan);
-        meta.appendChild(scoreSpan);
-        row.appendChild(meta);
-
-        const body = document.createElement('div');
-        body.className = 'retrieval-text';
-        body.textContent = item.text;
-        row.appendChild(body);
-
-        list.appendChild(row);
-      });
-
-      btn.addEventListener('click', () => {
-        const open = list.classList.toggle('open');
-        btn.textContent = (open ? '▾ Hide' : '▸ Show') +
-          ' the ' + retrieved.length + ' passages consulted';
-      });
-
-      panel.appendChild(btn);
-      panel.appendChild(list);
-      card.appendChild(panel);
+      card.appendChild(buildRetrievalPanel(retrieved));
     }
 
-    answerArea.appendChild(card);
-    requestAnimationFrame(() => card.classList.add('show'));
+    return card;
+  }
+
+  function buildRetrievalPanel(retrieved) {
+    const panel = document.createElement('div');
+    panel.className = 'retrieval-panel';
+
+    const btn = document.createElement('button');
+    btn.className = 'retrieval-toggle';
+    btn.textContent = '▸ Show the ' + retrieved.length + ' passages consulted';
+
+    const list = document.createElement('div');
+    list.className = 'retrieval-list';
+
+    retrieved.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'retrieval-item';
+
+      const meta = document.createElement('div');
+      meta.className = 'retrieval-meta';
+
+      const srcSpan = document.createElement('span');
+      srcSpan.className = 'retrieval-source';
+      srcSpan.textContent = item.source;
+
+      const scoreSpan = document.createElement('span');
+      scoreSpan.className = 'retrieval-score';
+      const pct = Math.max(0, Math.min(100, item.score * 100));
+      scoreSpan.innerHTML = item.score.toFixed(3) +
+        '<span class="score-bar"><span class="score-fill" style="width:' + pct + '%"></span></span>';
+
+      meta.appendChild(srcSpan);
+      meta.appendChild(scoreSpan);
+      row.appendChild(meta);
+
+      const body = document.createElement('div');
+      body.className = 'retrieval-text';
+      body.textContent = item.text;
+      row.appendChild(body);
+
+      list.appendChild(row);
+    });
+
+    btn.addEventListener('click', () => {
+      const open = list.classList.toggle('open');
+      btn.textContent = (open ? '▾ Hide' : '▸ Show') +
+        ' the ' + retrieved.length + ' passages consulted';
+    });
+
+    panel.appendChild(btn);
+    panel.appendChild(list);
+    return panel;
   }
 
   askBtn.addEventListener('click', ask);
