@@ -74,6 +74,59 @@ def answer_without_rag(question):
     ])
     return response.choices[0].message.content
 
+def stream_answer_query(question, top_k=5):
+    results = get_top_chunks(question, top_k=top_k)
+    context = build_context(results)
+
+    user_message = f"Context:\n{context}\n\nQuestion: {question}"
+
+    model = get_chat_model()
+    client = model.get_chat_client()
+
+    sources = []
+    for score, chunk in results:
+        if chunk["source"] not in sources:
+            sources.append(chunk["source"])
+
+    retrieved = []
+    for score, chunk in results:
+        retrieved.append({
+            "source": chunk["source"],
+            "score": round(float(score), 3),
+            "text": chunk["text"]
+        })
+
+    def token_stream():
+        for chunk in client.complete_streaming_chat([
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ]):
+            if not chunk.choices:
+                continue
+            content = chunk.choices[0].delta.content
+            if content:
+                yield content
+
+    return token_stream, sources, retrieved
+
+
+def stream_answer_without_rag(question):
+    model = get_chat_model()
+    client = model.get_chat_client()
+
+    def token_stream():
+        for chunk in client.complete_streaming_chat([
+            {"role": "system", "content": "You are an assistant answering questions about Elden Ring lore."},
+            {"role": "user", "content": question}
+        ]):
+            if not chunk.choices:
+                continue
+            content = chunk.choices[0].delta.content
+            if content:
+                yield content
+
+    return token_stream
+
 if __name__ == "__main__":
     question = "What is Radagon's secret?"
     print(f"Question: {question}\n")

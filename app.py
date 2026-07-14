@@ -1,5 +1,11 @@
-from flask import Flask, request, jsonify, send_from_directory
-from rag import answer_query, answer_without_rag
+from flask import Flask, request, jsonify, send_from_directory, Response, stream_with_context
+from rag import (
+    answer_query,
+    answer_without_rag,
+    stream_answer_query,
+    stream_answer_without_rag,
+)
+import json
 
 app = Flask(__name__)
 
@@ -51,6 +57,34 @@ def compare():
             "answer": plain_answer
         }
     })
+    
+
+@app.route("/ask-stream", methods=["POST"])
+def ask_stream():
+    data = request.get_json()
+    question = data.get("question", "").strip()
+    use_rag = data.get("use_rag", True)
+
+    if not question:
+        return jsonify({"error": "Question is empty."}), 400
+
+    if use_rag:
+        token_stream, sources, retrieved = stream_answer_query(question)
+        meta = {"sources": sources, "retrieved": retrieved}
+    else:
+        token_stream = stream_answer_without_rag(question)
+        meta = {"sources": [], "retrieved": []}
+
+    def generate():
+        yield json.dumps({"type": "meta", "data": meta}) + "\n"
+        for token in token_stream():
+            yield json.dumps({"type": "token", "data": token}) + "\n"
+        yield json.dumps({"type": "done"}) + "\n"
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="application/x-ndjson"
+    )
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

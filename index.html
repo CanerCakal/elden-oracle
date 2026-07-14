@@ -402,36 +402,90 @@ const askBtn = document.getElementById('askBtn');
     answerArea.innerHTML = '';
     statusEl.innerHTML = '<span class="dots">Consulting the records</span>';
 
-    const endpoint = mode === 'compare' ? '/compare' : '/ask';
-    const payload = mode === 'compare'
-      ? { question }
-      : { question, use_rag: mode === 'rag' };
-
     try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      statusEl.textContent = '';
-
-      if (data.error) {
-        statusEl.textContent = data.error;
-        return;
-      }
-
       if (mode === 'compare') {
+        const res = await fetch('/compare', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+        statusEl.textContent = '';
+        if (data.error) { statusEl.textContent = data.error; return; }
         renderComparison(data);
       } else {
-        const card = buildCard(data.answer, data.sources, data.retrieved, mode === 'rag');
-        answerArea.appendChild(card);
-        requestAnimationFrame(() => card.classList.add('show'));
+        await askStreaming(question, mode === 'rag');
       }
     } catch (err) {
       statusEl.textContent = 'The connection to the local archive failed. Is the server running?';
     } finally {
       askBtn.disabled = false;
+    }
+  }
+
+  async function askStreaming(question, useRag) {
+    const res = await fetch('/ask-stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, use_rag: useRag })
+    });
+
+    const card = document.createElement('div');
+    card.className = 'answer-card';
+
+    const modeEl = document.createElement('div');
+    modeEl.className = 'answer-mode ' + (useRag ? 'rag-on' : 'rag-off');
+    modeEl.textContent = useRag ? 'Retrieval-grounded' : 'Unaided model';
+    card.appendChild(modeEl);
+
+    const textEl = document.createElement('div');
+    textEl.className = 'answer-text';
+    card.appendChild(textEl);
+
+    answerArea.appendChild(card);
+    requestAnimationFrame(() => card.classList.add('show'));
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let meta = null;
+    let firstToken = true;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const msg = JSON.parse(line);
+
+        if (msg.type === 'meta') {
+          meta = msg.data;
+        } else if (msg.type === 'token') {
+          if (firstToken) {
+            statusEl.textContent = '';
+            firstToken = false;
+          }
+          textEl.textContent += msg.data;
+        }
+      }
+    }
+
+    statusEl.textContent = '';
+
+    if (meta && meta.sources && meta.sources.length > 0) {
+      const src = document.createElement('div');
+      src.className = 'sources';
+      src.innerHTML = 'Drawn from: <span>' + meta.sources.join('</span>, <span>') + '</span>';
+      card.appendChild(src);
+    }
+
+    if (meta && meta.retrieved && meta.retrieved.length > 0) {
+      card.appendChild(buildRetrievalPanel(meta.retrieved));
     }
   }
 
