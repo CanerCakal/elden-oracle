@@ -1,467 +1,584 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Elden Oracle</title>
-<style>
-  :root {
-    --bg: #0e0b06;
-    --bg-raised: #17110a;
-    --ink: #e8dcc0;
-    --ink-dim: #a1906b;
-    --gold: #c9a227;
-    --gold-bright: #efc75e;
-    --ember: #b5651d;
-    --line: #2a2013;
-    --grace: #f0d98c;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elden Oracle</title>
+  <style>
+    :root {
+      --bg: #0e0b06;
+      --bg-raised: #17110a;
+      --ink: #e8dcc0;
+      --ink-dim: #a1906b;
+      --gold: #c9a227;
+      --gold-bright: #efc75e;
+      --ember: #b5651d;
+      --line: #2a2013;
+      --grace: #f0d98c;
+    }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  body {
-    background:
-      radial-gradient(ellipse at 50% -10%, rgba(201,162,39,0.14), transparent 60%),
-      radial-gradient(ellipse at 50% 120%, rgba(181,101,29,0.10), transparent 55%),
-      var(--bg);
-    color: var(--ink);
-    font-family: Georgia, 'Times New Roman', serif;
-    min-height: 100vh;
-    line-height: 1.65;
-  }
+    body {
+      background:
+        radial-gradient(ellipse at 50% -10%, rgba(201, 162, 39, 0.14), transparent 60%),
+        radial-gradient(ellipse at 50% 120%, rgba(181, 101, 29, 0.10), transparent 55%),
+        var(--bg);
+      color: var(--ink);
+      font-family: Georgia, 'Times New Roman', serif;
+      min-height: 100vh;
+      line-height: 1.65;
+    }
 
-  .wrap {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 4rem 1.5rem 5rem;
-  }
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 5rem;
+    }
 
-  header { text-align: center; margin-bottom: 3rem; }
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
 
-  .eyebrow {
-    font-size: 0.72rem;
-    letter-spacing: 0.42em;
-    text-transform: uppercase;
-    color: var(--ink-dim);
-    margin-bottom: 1.1rem;
-    padding-left: 0.42em;
-  }
+    .eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-bottom: 1.1rem;
+      padding-left: 0.42em;
+    }
 
-  h1 {
-    font-size: clamp(2.6rem, 8vw, 4.4rem);
-    font-weight: normal;
-    letter-spacing: 0.02em;
-    background: linear-gradient(180deg, var(--gold-bright), var(--gold) 55%, var(--ember));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    line-height: 1.05;
-  }
+    h1 {
+      font-size: clamp(2.6rem, 8vw, 4.4rem);
+      font-weight: normal;
+      letter-spacing: 0.02em;
+      background: linear-gradient(180deg, var(--gold-bright), var(--gold) 55%, var(--ember));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.05;
+    }
 
-  .tagline {
-    margin-top: 1.1rem;
-    color: var(--ink-dim);
-    font-style: italic;
-    font-size: 1.02rem;
-  }
+    .tagline {
+      margin-top: 1.1rem;
+      color: var(--ink-dim);
+      font-style: italic;
+      font-size: 1.02rem;
+    }
 
-  .rule {
-    width: 60%;
-    max-width: 340px;
-    height: 1px;
-    margin: 1.8rem auto 0;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    opacity: 0.5;
-  }
+    .rule {
+      width: 60%;
+      max-width: 340px;
+      height: 1px;
+      margin: 1.8rem auto 0;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0.5;
+    }
 
-  .console {
-    background: linear-gradient(180deg, var(--bg-raised), rgba(23,17,10,0.6));
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 1.8rem;
-    box-shadow: 0 30px 80px -40px rgba(0,0,0,0.9), inset 0 1px 0 rgba(239,199,94,0.06);
-  }
+    .console {
+      background: linear-gradient(180deg, var(--bg-raised), rgba(23, 17, 10, 0.6));
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1.8rem;
+      box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(239, 199, 94, 0.06);
+    }
 
-  .field { position: relative; }
+    .field {
+      position: relative;
+    }
 
-  textarea {
-    width: 100%;
-    background: rgba(8,6,3,0.6);
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    color: var(--ink);
-    font-family: inherit;
-    font-size: 1.05rem;
-    padding: 1rem 1.1rem;
-    resize: vertical;
-    min-height: 92px;
-    transition: border-color 0.25s;
-  }
-  textarea:focus {
-    outline: none;
-    border-color: var(--gold);
-    box-shadow: 0 0 0 1px rgba(201,162,39,0.3);
-  }
-  textarea::placeholder { color: #6a5c3f; font-style: italic; }
+    textarea {
+      width: 100%;
+      background: rgba(8, 6, 3, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 1.05rem;
+      padding: 1rem 1.1rem;
+      resize: vertical;
+      min-height: 92px;
+      transition: border-color 0.25s;
+    }
 
-  .controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 1.2rem;
-    flex-wrap: wrap;
-  }
+    textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.3);
+    }
 
-  .toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    cursor: pointer;
-    user-select: none;
-  }
-  .toggle input { display: none; }
-  .track {
-    width: 46px; height: 24px;
-    background: #241a0f;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    position: relative;
-    transition: background 0.25s, border-color 0.25s;
-  }
-  .thumb {
-    position: absolute; top: 2px; left: 2px;
-    width: 18px; height: 18px;
-    background: var(--ink-dim);
-    border-radius: 50%;
-    transition: transform 0.25s, background 0.25s;
-  }
-  .toggle input:checked + .track {
-    background: rgba(201,162,39,0.25);
-    border-color: var(--gold);
-  }
-  .toggle input:checked + .track .thumb {
-    transform: translateX(22px);
-    background: var(--grace);
-    box-shadow: 0 0 10px rgba(240,217,140,0.7);
-  }
-  .toggle-label { font-size: 0.9rem; color: var(--ink-dim); }
-  .toggle-label b { color: var(--ink); font-weight: normal; }
+    textarea::placeholder {
+      color: #6a5c3f;
+      font-style: italic;
+    }
 
-  button.ask {
-    background: linear-gradient(180deg, var(--gold), var(--ember));
-    color: #1a1206;
-    border: none;
-    border-radius: 3px;
-    font-family: inherit;
-    font-size: 1rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.75rem 1.8rem;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.25s, opacity 0.2s;
-    box-shadow: 0 6px 20px -8px rgba(201,162,39,0.6);
-  }
-  button.ask:hover { transform: translateY(-1px); box-shadow: 0 10px 26px -8px rgba(201,162,39,0.75); }
-  button.ask:active { transform: translateY(0); }
-  button.ask:disabled { opacity: 0.5; cursor: wait; }
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.2rem;
+      flex-wrap: wrap;
+    }
 
-  .answer-area { margin-top: 2.2rem; }
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      cursor: pointer;
+      user-select: none;
+    }
 
-  .answer-card {
-    background: rgba(8,6,3,0.4);
-    border-left: 2px solid var(--gold);
-    border-radius: 2px;
-    padding: 1.4rem 1.5rem;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.5s, transform 0.5s;
-  }
-  .answer-card.show { opacity: 1; transform: translateY(0); }
+    .toggle input {
+      display: none;
+    }
 
-  .answer-mode {
-    font-size: 0.68rem;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    margin-bottom: 0.9rem;
-    color: var(--ink-dim);
-  }
-  .answer-mode.rag-on { color: var(--grace); }
-  .answer-mode.rag-off { color: var(--ember); }
+    .track {
+      width: 46px;
+      height: 24px;
+      background: #241a0f;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      position: relative;
+      transition: background 0.25s, border-color 0.25s;
+    }
 
-  .answer-text { font-size: 1.06rem; white-space: pre-wrap; }
+    .thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: var(--ink-dim);
+      border-radius: 50%;
+      transition: transform 0.25s, background 0.25s;
+    }
 
-  .sources {
-    margin-top: 1.3rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--line);
-    font-size: 0.85rem;
-    color: var(--ink-dim);
-  }
+    .toggle input:checked+.track {
+      background: rgba(201, 162, 39, 0.25);
+      border-color: var(--gold);
+    }
 
-  .retrieval-panel {
-    margin-top: 1.2rem;
-    border-top: 1px solid var(--line);
-    padding-top: 1rem;
-  }
+    .toggle input:checked+.track .thumb {
+      transform: translateX(22px);
+      background: var(--grace);
+      box-shadow: 0 0 10px rgba(240, 217, 140, 0.7);
+    }
 
-  .retrieval-toggle {
-    background: none;
-    border: none;
-    color: var(--ink-dim);
-    font-family: inherit;
-    font-size: 0.82rem;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    padding: 0;
-    transition: color 0.2s;
-  }
-  .retrieval-toggle:hover { color: var(--gold-bright); }
+    .toggle-label {
+      font-size: 0.9rem;
+      color: var(--ink-dim);
+    }
 
-  .retrieval-list {
-    display: none;
-    margin-top: 1rem;
-  }
-  .retrieval-list.open { display: block; }
+    .toggle-label b {
+      color: var(--ink);
+      font-weight: normal;
+    }
 
-  .retrieval-item {
-    background: rgba(8,6,3,0.5);
-    border-left: 2px solid var(--line);
-    padding: 0.8rem 1rem;
-    margin-bottom: 0.7rem;
-    border-radius: 2px;
-    transition: border-color 0.2s;
-  }
-  .retrieval-item:hover { border-left-color: var(--gold); }
+    button.ask {
+      background: linear-gradient(180deg, var(--gold), var(--ember));
+      color: #1a1206;
+      border: none;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.75rem 1.8rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.25s, opacity 0.2s;
+      box-shadow: 0 6px 20px -8px rgba(201, 162, 39, 0.6);
+    }
 
-  .retrieval-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    font-size: 0.78rem;
-  }
-  .retrieval-source {
-    color: var(--gold-bright);
-    font-style: italic;
-    letter-spacing: 0.04em;
-  }
-  .retrieval-score {
-    color: var(--ink-dim);
-    font-variant-numeric: tabular-nums;
-  }
-  .score-bar {
-    display: inline-block;
-    width: 60px;
-    height: 3px;
-    background: var(--line);
-    border-radius: 2px;
-    margin-left: 0.6rem;
-    vertical-align: middle;
-    overflow: hidden;
-  }
-  .score-fill {
-    display: block;
-    height: 100%;
-    background: linear-gradient(90deg, var(--ember), var(--gold-bright));
-  }
+    button.ask:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px -8px rgba(201, 162, 39, 0.75);
+    }
 
-  .retrieval-text {
-    font-size: 0.88rem;
-    color: var(--ink-dim);
-    line-height: 1.55;
-  }
+    button.ask:active {
+      transform: translateY(0);
+    }
 
-  .compare-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.2rem;
-  }
-  @media (max-width: 720px) {
-    .compare-grid { grid-template-columns: 1fr; }
-  }
+    button.ask:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
 
-  .compare-grid .answer-card { margin: 0; }
-  .compare-grid .answer-card.grounded { border-left-color: var(--gold); }
-  .compare-grid .answer-card.unaided { border-left-color: var(--ember); }
+    .answer-area {
+      margin-top: 2.2rem;
+    }
 
-  .mode-select {
-    display: flex;
-    gap: 0.4rem;
-    background: rgba(8,6,3,0.6);
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    padding: 0.25rem;
-  }
-  .mode-select button {
-    background: none;
-    border: none;
-    color: var(--ink-dim);
-    font-family: inherit;
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
-    padding: 0.4rem 0.9rem;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-  }
-  .mode-select button:hover { color: var(--ink); }
-  .mode-select button.active {
-    background: rgba(201,162,39,0.18);
-    color: var(--grace);
-  }
+    .answer-card {
+      background: rgba(8, 6, 3, 0.4);
+      border-left: 2px solid var(--gold);
+      border-radius: 2px;
+      padding: 1.4rem 1.5rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
 
-  .sources span {
-    color: var(--gold-bright);
-    font-style: italic;
-  }
+    .answer-card.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-  .status {
-    text-align: center;
-    color: var(--ink-dim);
-    font-style: italic;
-    margin-top: 2rem;
-    min-height: 1.5rem;
-  }
-  .dots::after {
-    content: '';
-    animation: dots 1.4s steps(4, end) infinite;
-  }
-  @keyframes dots {
-    0% { content: ''; } 25% { content: '.'; }
-    50% { content: '..'; } 75% { content: '...'; }
-  }
+    .answer-mode {
+      font-size: 0.68rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      margin-bottom: 0.9rem;
+      color: var(--ink-dim);
+    }
 
-  footer {
-    text-align: center;
-    margin-top: 4rem;
-    color: #5a4d33;
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
-  }
+    .answer-mode.rag-on {
+      color: var(--grace);
+    }
 
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; animation: none !important; }
-  }
-</style>
+    .answer-mode.rag-off {
+      color: var(--ember);
+    }
+
+    .answer-text {
+      font-size: 1.06rem;
+      white-space: pre-wrap;
+    }
+
+    .sources {
+      margin-top: 1.3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.85rem;
+      color: var(--ink-dim);
+    }
+
+    .retrieval-panel {
+      margin-top: 1.2rem;
+      border-top: 1px solid var(--line);
+      padding-top: 1rem;
+    }
+
+    .retrieval-toggle {
+      background: none;
+      border: none;
+      color: var(--ink-dim);
+      font-family: inherit;
+      font-size: 0.82rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .retrieval-toggle:hover {
+      color: var(--gold-bright);
+    }
+
+    .retrieval-list {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .retrieval-list.open {
+      display: block;
+    }
+
+    .retrieval-item {
+      background: rgba(8, 6, 3, 0.5);
+      border-left: 2px solid var(--line);
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.7rem;
+      border-radius: 2px;
+      transition: border-color 0.2s;
+    }
+
+    .retrieval-item:hover {
+      border-left-color: var(--gold);
+    }
+
+    .retrieval-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-size: 0.78rem;
+    }
+
+    .retrieval-source {
+      color: var(--gold-bright);
+      font-style: italic;
+      letter-spacing: 0.04em;
+    }
+
+    .retrieval-score {
+      color: var(--ink-dim);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .score-bar {
+      display: inline-block;
+      width: 60px;
+      height: 3px;
+      background: var(--line);
+      border-radius: 2px;
+      margin-left: 0.6rem;
+      vertical-align: middle;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--ember), var(--gold-bright));
+    }
+
+    .retrieval-text {
+      font-size: 0.88rem;
+      color: var(--ink-dim);
+      line-height: 1.55;
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    @media (max-width: 720px) {
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .compare-grid .answer-card {
+      margin: 0;
+    }
+
+    .compare-grid .answer-card.grounded {
+      border-left-color: var(--gold);
+    }
+
+    .compare-grid .answer-card.unaided {
+      border-left-color: var(--ember);
+    }
+
+    .mode-select {
+      display: flex;
+      gap: 0.4rem;
+      background: rgba(8, 6, 3, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: 0.25rem;
+    }
+
+    .mode-select button {
+      background: none;
+      border: none;
+      color: var(--ink-dim);
+      font-family: inherit;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      padding: 0.4rem 0.9rem;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .mode-select button:hover {
+      color: var(--ink);
+    }
+
+    .mode-select button.active {
+      background: rgba(201, 162, 39, 0.18);
+      color: var(--grace);
+    }
+
+    .sources span {
+      color: var(--gold-bright);
+      font-style: italic;
+    }
+
+    .status {
+      text-align: center;
+      color: var(--ink-dim);
+      font-style: italic;
+      margin-top: 2rem;
+      min-height: 1.5rem;
+    }
+
+    .dots::after {
+      content: '';
+      animation: dots 1.4s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0% {
+        content: '';
+      }
+
+      25% {
+        content: '.';
+      }
+
+      50% {
+        content: '..';
+      }
+
+      75% {
+        content: '...';
+      }
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      color: #5a4d33;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <div class="wrap">
     <header>
-      <div class="eyebrow">Lands Between &middot; Lore Archive</div>
+      <div class="eyebrow">Ara B&ouml;lge &middot; Lore Ar&#351;ivi</div>
       <h1>Elden Oracle</h1>
-      <p class="tagline">Ask, and the records shall answer &mdash; grounded, never guessed.</p>
+      <p class="tagline">Sor, ar&#351;iv yan&#305;tlas&#305;n &mdash; kaynakl&#305;, asla tahmin de&#287;il.</p>
       <div class="rule"></div>
     </header>
 
     <section class="console">
       <div class="field">
-        <textarea id="question" placeholder="Who is Radagon, truly? What became of Ranni?"></textarea>
+        <textarea id="question" placeholder="Radagon ger&ccedil;ekte kim? Ranni'ye ne oldu?"></textarea>
       </div>
       <div class="controls">
         <div class="mode-select">
-          <button data-mode="rag" class="active">Retrieval on</button>
-          <button data-mode="plain">Retrieval off</button>
-          <button data-mode="compare">Compare</button>
+          <button data-mode="rag" class="active">RAG a&ccedil;&#305;k</button>
+          <button data-mode="plain">RAG kapal&#305;</button>
+          <button data-mode="compare">Kar&#351;&#305;la&#351;t&#305;r</button>
         </div>
-        <button class="ask" id="askBtn">Consult</button>
+        <button class="ask" id="askBtn">Sor</button>
       </div>
     </section>
 
     <div class="answer-area" id="answerArea"></div>
     <div class="status" id="status"></div>
 
-    <footer>Powered locally &middot; Foundry Local &middot; No connection to the outer world</footer>
+    <footer>Yerel &ccedil;al&#305;&#351;&#305;r &middot; Foundry Local &middot; D&#305;&#351; d&uuml;nyaya
+      ba&#287;lant&#305; yok</footer>
   </div>
 
-<script>
-const askBtn = document.getElementById('askBtn');
-  const questionEl = document.getElementById('question');
-  const answerArea = document.getElementById('answerArea');
-  const statusEl = document.getElementById('status');
-  const modeButtons = document.querySelectorAll('.mode-select button');
+  <script>
+    const askBtn = document.getElementById('askBtn');
+    const questionEl = document.getElementById('question');
+    const answerArea = document.getElementById('answerArea');
+    const statusEl = document.getElementById('status');
+    const modeButtons = document.querySelectorAll('.mode-select button');
 
-  let mode = 'rag';
+    let mode = 'rag';
 
-  modeButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      modeButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      mode = btn.dataset.mode;
+    modeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        mode = btn.dataset.mode;
+      });
     });
-  });
 
-  async function ask() {
-    const question = questionEl.value.trim();
-    if (!question) {
-      statusEl.textContent = 'The archive awaits a question.';
-      return;
-    }
-
-    askBtn.disabled = true;
-    answerArea.innerHTML = '';
-    statusEl.innerHTML = '<span class="dots">Consulting the records</span>';
-
-    try {
-      if (mode === 'compare') {
-        const res = await fetch('/compare', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question })
-        });
-        const data = await res.json();
-        statusEl.textContent = '';
-        if (data.error) { statusEl.textContent = data.error; return; }
-        renderComparison(data);
-      } else {
-        await askStreaming(question, mode === 'rag');
+    async function ask() {
+      const question = questionEl.value.trim();
+      if (!question) {
+        statusEl.textContent = 'Arşiv bir soru bekliyor.';
+        return;
       }
-    } catch (err) {
-      statusEl.textContent = 'The connection to the local archive failed. Is the server running?';
+
+      askBtn.disabled = true;
+      answerArea.innerHTML = '';
+      statusEl.innerHTML = '<span class="dots">Arşiv taranıyor</span>';
+
+      try {
+        if (mode === 'compare') {
+          const res = await fetch('/compare', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question })
+          });
+          const data = await res.json();
+          statusEl.textContent = '';
+          if (data.error) { statusEl.textContent = data.error; return; }
+          renderComparison(data);
+        } else {
+          await askStreaming(question, mode === 'rag');
+        }
+      } catch (err) {
+      if (answerArea.querySelector('.answer-text') === null ||
+          answerArea.querySelector('.answer-text').textContent.trim() === '') {
+        statusEl.textContent = 'Yerel arşive bağlanılamadı. Sunucu çalışıyor mu?';
+      }
     } finally {
       askBtn.disabled = false;
     }
-  }
+    }
 
-  async function askStreaming(question, useRag) {
-    const res = await fetch('/ask-stream', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, use_rag: useRag })
-    });
+    async function askStreaming(question, useRag) {
+      const res = await fetch('/ask-stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, use_rag: useRag })
+      });
 
-    const card = document.createElement('div');
-    card.className = 'answer-card';
+      const card = document.createElement('div');
+      card.className = 'answer-card';
 
-    const modeEl = document.createElement('div');
-    modeEl.className = 'answer-mode ' + (useRag ? 'rag-on' : 'rag-off');
-    modeEl.textContent = useRag ? 'Retrieval-grounded' : 'Unaided model';
-    card.appendChild(modeEl);
+      const modeEl = document.createElement('div');
+      modeEl.className = 'answer-mode ' + (useRag ? 'rag-on' : 'rag-off');
+      modeEl.textContent = useRag ? 'Kaynağa dayalı yanıt' : 'Getirmesiz model';
+      card.appendChild(modeEl);
 
-    const textEl = document.createElement('div');
-    textEl.className = 'answer-text';
-    card.appendChild(textEl);
+      const textEl = document.createElement('div');
+      textEl.className = 'answer-text';
+      card.appendChild(textEl);
 
-    answerArea.appendChild(card);
-    requestAnimationFrame(() => card.classList.add('show'));
+      answerArea.appendChild(card);
+      requestAnimationFrame(() => card.classList.add('show'));
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let meta = null;
-    let firstToken = true;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let meta = null;
+      let firstToken = true;
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
 
-      for (const line of lines) {
+        for (const line of lines) {
         if (!line.trim()) continue;
-        const msg = JSON.parse(line);
+        let msg;
+        try {
+          msg = JSON.parse(line);
+        } catch (e) {
+          continue;
+        }
 
         if (msg.type === 'meta') {
           meta = msg.data;
@@ -473,129 +590,130 @@ const askBtn = document.getElementById('askBtn');
           textEl.textContent += msg.data;
         }
       }
+      }
+
+      statusEl.textContent = '';
+
+      if (meta && meta.sources && meta.sources.length > 0) {
+        const src = document.createElement('div');
+        src.className = 'sources';
+        src.innerHTML = 'Kaynak: <span>' + sources.join('</span>, <span>') + '</span>';
+        card.appendChild(src);
+      }
+
+      if (meta && meta.retrieved && meta.retrieved.length > 0) {
+        card.appendChild(buildRetrievalPanel(meta.retrieved));
+      }
     }
 
-    statusEl.textContent = '';
+    function renderComparison(data) {
+      const grid = document.createElement('div');
+      grid.className = 'compare-grid';
 
-    if (meta && meta.sources && meta.sources.length > 0) {
-      const src = document.createElement('div');
-      src.className = 'sources';
-      src.innerHTML = 'Drawn from: <span>' + meta.sources.join('</span>, <span>') + '</span>';
-      card.appendChild(src);
+      const groundedCard = buildCard(
+        data.rag.answer, data.rag.sources, data.rag.retrieved, true
+      );
+      groundedCard.classList.add('grounded');
+
+      const unaidedCard = buildCard(
+        data.plain.answer, [], null, false
+      );
+      unaidedCard.classList.add('unaided');
+
+      grid.appendChild(groundedCard);
+      grid.appendChild(unaidedCard);
+      answerArea.appendChild(grid);
+
+      requestAnimationFrame(() => {
+        groundedCard.classList.add('show');
+        unaidedCard.classList.add('show');
+      });
     }
 
-    if (meta && meta.retrieved && meta.retrieved.length > 0) {
-      card.appendChild(buildRetrievalPanel(meta.retrieved));
+    function buildCard(answer, sources, retrieved, useRag) {
+      const card = document.createElement('div');
+      card.className = 'answer-card';
+
+      const mode = document.createElement('div');
+      mode.className = 'answer-mode ' + (useRag ? 'rag-on' : 'rag-off');
+      mode.textContent = useRag ? 'Kaynağa dayalı yanıt' : 'Getirmesiz model';
+      card.appendChild(mode);
+
+      const text = document.createElement('div');
+      text.className = 'answer-text';
+      text.textContent = answer;
+      card.appendChild(text);
+
+      if (sources && sources.length > 0) {
+        const src = document.createElement('div');
+        src.className = 'sources';
+        src.innerHTML = 'Kaynak: <span>' + sources.join('</span>, <span>') + '</span>';
+        card.appendChild(src);
+      }
+
+      if (retrieved && retrieved.length > 0) {
+        card.appendChild(buildRetrievalPanel(retrieved));
+      }
+
+      return card;
     }
-  }
 
-  function renderComparison(data) {
-    const grid = document.createElement('div');
-    grid.className = 'compare-grid';
+    function buildRetrievalPanel(retrieved) {
+      const panel = document.createElement('div');
+      panel.className = 'retrieval-panel';
 
-    const groundedCard = buildCard(
-      data.rag.answer, data.rag.sources, data.rag.retrieved, true
-    );
-    groundedCard.classList.add('grounded');
+      const btn = document.createElement('button');
+      btn.className = 'retrieval-toggle';
+      btn.textContent = '▸ Kullanılan ' + retrieved.length + ' parçayı göster';
 
-    const unaidedCard = buildCard(
-      data.plain.answer, [], null, false
-    );
-    unaidedCard.classList.add('unaided');
+      const list = document.createElement('div');
+      list.className = 'retrieval-list';
 
-    grid.appendChild(groundedCard);
-    grid.appendChild(unaidedCard);
-    answerArea.appendChild(grid);
+      retrieved.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'retrieval-item';
 
-    requestAnimationFrame(() => {
-      groundedCard.classList.add('show');
-      unaidedCard.classList.add('show');
+        const meta = document.createElement('div');
+        meta.className = 'retrieval-meta';
+
+        const srcSpan = document.createElement('span');
+        srcSpan.className = 'retrieval-source';
+        srcSpan.textContent = item.source;
+
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'retrieval-score';
+        const pct = Math.max(0, Math.min(100, item.score * 100));
+        scoreSpan.innerHTML = item.score.toFixed(3) +
+          '<span class="score-bar"><span class="score-fill" style="width:' + pct + '%"></span></span>';
+
+        meta.appendChild(srcSpan);
+        meta.appendChild(scoreSpan);
+        row.appendChild(meta);
+
+        const body = document.createElement('div');
+        body.className = 'retrieval-text';
+        body.textContent = item.text;
+        row.appendChild(body);
+
+        list.appendChild(row);
+      });
+
+      btn.addEventListener('click', () => {
+        const open = list.classList.toggle('open'); 
+        btn.textContent = (open ? '▾ Gizle: ' : '▸ Göster: ') +
+        'kullanılan ' + retrieved.length + ' parça';
+      });
+
+      panel.appendChild(btn);
+      panel.appendChild(list);
+      return panel;
+    }
+
+    askBtn.addEventListener('click', ask);
+    questionEl.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') ask();
     });
-  }
-
-  function buildCard(answer, sources, retrieved, useRag) {
-    const card = document.createElement('div');
-    card.className = 'answer-card';
-
-    const mode = document.createElement('div');
-    mode.className = 'answer-mode ' + (useRag ? 'rag-on' : 'rag-off');
-    mode.textContent = useRag ? 'Retrieval-grounded' : 'Unaided model';
-    card.appendChild(mode);
-
-    const text = document.createElement('div');
-    text.className = 'answer-text';
-    text.textContent = answer;
-    card.appendChild(text);
-
-    if (sources && sources.length > 0) {
-      const src = document.createElement('div');
-      src.className = 'sources';
-      src.innerHTML = 'Drawn from: <span>' + sources.join('</span>, <span>') + '</span>';
-      card.appendChild(src);
-    }
-
-    if (retrieved && retrieved.length > 0) {
-      card.appendChild(buildRetrievalPanel(retrieved));
-    }
-
-    return card;
-  }
-
-  function buildRetrievalPanel(retrieved) {
-    const panel = document.createElement('div');
-    panel.className = 'retrieval-panel';
-
-    const btn = document.createElement('button');
-    btn.className = 'retrieval-toggle';
-    btn.textContent = '▸ Show the ' + retrieved.length + ' passages consulted';
-
-    const list = document.createElement('div');
-    list.className = 'retrieval-list';
-
-    retrieved.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'retrieval-item';
-
-      const meta = document.createElement('div');
-      meta.className = 'retrieval-meta';
-
-      const srcSpan = document.createElement('span');
-      srcSpan.className = 'retrieval-source';
-      srcSpan.textContent = item.source;
-
-      const scoreSpan = document.createElement('span');
-      scoreSpan.className = 'retrieval-score';
-      const pct = Math.max(0, Math.min(100, item.score * 100));
-      scoreSpan.innerHTML = item.score.toFixed(3) +
-        '<span class="score-bar"><span class="score-fill" style="width:' + pct + '%"></span></span>';
-
-      meta.appendChild(srcSpan);
-      meta.appendChild(scoreSpan);
-      row.appendChild(meta);
-
-      const body = document.createElement('div');
-      body.className = 'retrieval-text';
-      body.textContent = item.text;
-      row.appendChild(body);
-
-      list.appendChild(row);
-    });
-
-    btn.addEventListener('click', () => {
-      const open = list.classList.toggle('open');
-      btn.textContent = (open ? '▾ Hide' : '▸ Show') +
-        ' the ' + retrieved.length + ' passages consulted';
-    });
-
-    panel.appendChild(btn);
-    panel.appendChild(list);
-    return panel;
-  }
-
-  askBtn.addEventListener('click', ask);
-  questionEl.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') ask();
-  });
-</script>
+  </script>
 </body>
+
 </html>

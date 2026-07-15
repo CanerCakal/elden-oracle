@@ -8,7 +8,7 @@ SYSTEM_PROMPT = """You are Elden Oracle, an expert assistant on the lore of Elde
 Answer the user's question using ONLY the context provided below.
 Do not use any outside knowledge. Do not invent facts.
 If the context does not contain the answer, reply exactly:
-"I don't have that information in my records."
+"Bu bilgi kayıtlarımda yok."
 
 Keep your answer clear and concise."""
 
@@ -69,7 +69,7 @@ def answer_without_rag(question):
     model = get_chat_model()
     client = model.get_chat_client()
     response = client.complete_chat([
-        {"role": "system", "content": "You are an assistant answering questions about Elden Ring lore."},
+      {"role": "system", "content": "You are an assistant answering questions about Elden Ring lore."},
         {"role": "user", "content": question}
     ])
     return response.choices[0].message.content
